@@ -1,0 +1,24 @@
+apiVersion: ecs.services.k8s.aws/v1alpha1
+kind: Service
+metadata:
+  name: sample-service
+  namespace: ack-system
+spec:
+  name: sample-service
+  clusterRef:
+    from:
+      name: sample-cluster
+  taskDefinitionRef:
+    from:
+      name: sample-task-definition
+  desiredCount: 1
+  launchType: FARGATE
+  networkConfiguration:
+    awsvpcConfiguration:
+      # 실제 Subnet ID로 교체하세요 (예: subnet-0a1b2c3d4e5f67890)
+      subnets:
+        - subnet-xxxxxxxxxxxxxxxxx
+      # 실제 Security Group ID로 교체하세요 (예: sg-0a1b2c3d4e5f67890)
+      securityGroups:
+        - sg-xxxxxxxxxxxxxxxxx
+      assignPublicIP: ENABLED

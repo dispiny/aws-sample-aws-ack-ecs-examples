@@ -1,0 +1,18 @@
+apiVersion: ecs.services.k8s.aws/v1alpha1
+kind: TaskDefinition
+metadata:
+  name: sample-task-definition
+  namespace: ack-system
+spec:
+  family: sample-task
+  cpu: "256"
+  memory: "512"
+  networkMode: awsvpc
+  requiresCompatibilities:
+    - FARGATE
+  containerDefinitions:
+    - name: sample-container
+      image: public.ecr.aws/nginx/nginx:latest
+      portMappings:
+        - containerPort: 80
+          protocol: tcp

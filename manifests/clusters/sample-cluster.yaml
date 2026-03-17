@@ -1,0 +1,10 @@
+apiVersion: ecs.services.k8s.aws/v1alpha1
+kind: Cluster
+metadata:
+  name: sample-cluster
+  namespace: ack-system
+spec:
+  name: sample-cluster
+  tags:
+    - key: ManagedBy
+      value: ACK
