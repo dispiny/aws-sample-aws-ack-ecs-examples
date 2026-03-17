@@ -1,0 +1,146 @@
+---
+# ServiceAccount for ACK ECS Controller
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ack-ecs-controller
+  namespace: ack-system
+  labels:
+    app.kubernetes.io/name: aws-ack-ecs-controller
+    app.kubernetes.io/component: controller
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT_ID:role/ack-ecs-controller-role
+
+---
+# ClusterRole for ACK ECS Controller
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ack-ecs-controller
+  labels:
+    app.kubernetes.io/name: aws-ack-ecs-controller
+rules:
+  # ECS Resources
+  - apiGroups:
+    - ecs.services.k8s.aws
+    resources:
+    - clusters
+    - taskdefinitions
+    - services
+    - tasks
+    - containersinstances
+    - tasksets
+    - containerinstances
+    verbs:
+    - create
+    - delete
+    - deletecollection
+    - get
+    - list
+    - patch
+    - update
+    - watch
+  
+  # Status Subresources
+  - apiGroups:
+    - ecs.services.k8s.aws
+    resources:
+    - clusters/status
+    - taskdefinitions/status
+    - services/status
+    - tasks/status
+    - containersinstances/status
+    - tasksets/status
+    verbs:
+    - get
+    - patch
+    - update
+  
+  # Core API Resources
+  - apiGroups:
+    - ""
+    resources:
+    - events
+    verbs:
+    - create
+    - patch
+  
+  - apiGroups:
+    - ""
+    resources:
+    - configmaps
+    verbs:
+    - get
+    - list
+    - watch
+
+---
+# ClusterRoleBinding for ACK ECS Controller
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ack-ecs-controller
+  labels:
+    app.kubernetes.io/name: aws-ack-ecs-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ack-ecs-controller
+subjects:
+- kind: ServiceAccount
+  name: ack-ecs-controller
+  namespace: ack-system
+
+---
+# Role for leader election
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ack-ecs-controller
+  namespace: ack-system
+  labels:
+    app.kubernetes.io/name: aws-ack-ecs-controller
+rules:
+  - apiGroups:
+    - ""
+    resources:
+    - configmaps
+    verbs:
+    - get
+    - list
+    - watch
+    - create
+    - update
+    - patch
+    - delete
+  
+  - apiGroups:
+    - coordination.k8s.io
+    resources:
+    - leases
+    verbs:
+    - get
+    - list
+    - watch
+    - create
+    - update
+    - patch
+    - delete
+
+---
+# RoleBinding for leader election
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ack-ecs-controller
+  namespace: ack-system
+  labels:
+    app.kubernetes.io/name: aws-ack-ecs-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: ack-ecs-controller
+subjects:
+- kind: ServiceAccount
+  name: ack-ecs-controller
+  namespace: ack-system

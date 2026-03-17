@@ -1,0 +1,78 @@
+---
+# ECS Task Definition Example
+apiVersion: ecs.services.k8s.aws/v1alpha1
+kind: TaskDefinition
+metadata:
+  name: example-task-def
+  namespace: default
+spec:
+  family: example-task
+  networkMode: awsvpc
+  requiresCompatibilities:
+  - FARGATE
+  cpu: "256"
+  memory: "512"
+  executionRoleARN: arn:aws:iam::ACCOUNT_ID:role/ecsTaskExecutionRole
+  taskRoleARN: arn:aws:iam::ACCOUNT_ID:role/ecsTaskRole
+  containerDefinitions:
+  - name: example-container
+    image: nginx:latest
+    portMappings:
+    - containerPort: 80
+      hostPort: 80
+      protocol: tcp
+    memory: 512
+    memoryReservation: 256
+    cpu: 256
+    essential: true
+    logConfiguration:
+      logDriver: awslogs
+      options:
+        awslogs-group: /ecs/example-task
+        awslogs-region: us-east-1
+        awslogs-stream-prefix: ecs
+    environment:
+    - name: APP_ENV
+      value: production
+    - name: LOG_LEVEL
+      value: info
+  tags:
+  - key: Name
+    value: example-task-definition
+  - key: Environment
+    value: production
+
+---
+# ECS Service Example
+apiVersion: ecs.services.k8s.aws/v1alpha1
+kind: Service
+metadata:
+  name: example-service
+  namespace: default
+spec:
+  cluster:
+    name: example-cluster
+  desiredCount: 2
+  launchType: FARGATE
+  taskDefinition:
+    familyAndRevision: example-task:1
+  loadBalancers:
+  - containerName: example-container
+    containerPort: 80
+    targetGroupARN: arn:aws:elasticloadbalancing:us-east-1:ACCOUNT_ID:targetgroup/example-tg/1234567890abcdef
+  networkConfiguration:
+    awsvpcConfiguration:
+      assignPublicIP: ENABLED
+      subnets:
+      - subnet-12345678
+      - subnet-87654321
+      securityGroups:
+      - sg-12345678
+  deploymentConfiguration:
+    maximumPercent: 200
+    minimumHealthyPercent: 100
+  tags:
+  - key: Name
+    value: example-service
+  - key: Environment
+    value: production

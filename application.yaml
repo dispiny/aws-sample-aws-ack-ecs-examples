@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aws-ack-ecs-controller
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://aws.github.io/eks-charts
+    chart: aws-controllers-k8s-ecs-chart
+    targetRevision: 1.3.0  # Update to the latest ACK ECS controller version
+    helm:
+      releaseName: aws-ack-ecs-controller
+      values: |
+        serviceAccount:
+          create: true
+          name: ack-ack-system
+          annotations:
+            eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT_ID:role/ack-ecs-controller-role
+        
+        aws:
+          region: us-east-1  # Change to your AWS region
+        
+        replicaCount: 1
+        
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        
+        nodeSelector: {}
+        tolerations: []
+        affinity: {}
+        
+        log:
+          level: info
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ack-system
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

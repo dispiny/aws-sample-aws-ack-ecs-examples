@@ -1,0 +1,204 @@
+# AWS ACK ECS Controller Helm Values
+
+# Replica count for the controller deployment
+replicaCount: 1
+
+image:
+  repository: public.ecr.aws/aws-controllers-k8s/ecs-controller
+  tag: v1.3.0
+  pullPolicy: IfNotPresent
+
+# ImagePullSecrets
+imagePullSecrets: []
+
+# Overrides the name of the chart
+nameOverride: ""
+fullnameOverride: ""
+
+serviceName: ""
+servicePort: 443
+
+# ServiceAccount Configuration
+serviceAccount:
+  create: true
+  name: ack-ecs-controller
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT_ID:role/ack-ecs-controller-role
+
+# Pod Security Context
+podSecurityContext:
+  fsGroup: 1000
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# Container Security Context
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+  # maxUnavailable: 1
+
+# Environment variables
+env:
+  # AWS Region
+  AWS_REGION: us-east-1
+  
+  # Log level (debug, info, warn, error)
+  LOG_LEVEL: info
+  
+  # Reconciliation interval in seconds
+  RECONCILIATION_INTERVAL: "300"
+  
+  # API version for ECS CRD
+  WATCH_NAMESPACE: ""
+
+# Additional environment variables from secrets or configmaps
+envFrom: []
+# Example:
+# - configMapRef:
+#     name: ack-system-config
+
+# AWS Configuration
+aws:
+  region: us-east-1
+
+# Logging configuration
+log:
+  level: info
+
+# Feature gates
+featureGates: {}
+# Example:
+# - MetricsCollection=false
+
+# Service Monitor for Prometheus (if Prometheus Operator is installed)
+serviceMonitor:
+  enabled: false
+  interval: 30s
+  scrapeTimeout: 10s
+  labels: {}
+
+# Dashboard for Grafana
+grafanaDashboard:
+  enabled: false
+
+# Leader Election configuration
+leaderElection:
+  enabled: true
+  leasingNamespace: ack-system
+
+# Additional init containers
+initContainers: []
+
+# Additional volumes
+volumes: []
+
+# Additional volume mounts
+volumeMounts: []
+
+# Additional labels to add to all resources
+labels:
+  app.kubernetes.io/name: aws-ack-ecs-controller
+  app.kubernetes.io/part-of: aws-controllers-k8s
+
+# Additional annotations
+annotations: {}
+
+# Pod annotations
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+
+# Lifecycle hooks
+lifecycle: {}
+
+# Probes
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: 8081
+  initialDelaySeconds: 15
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /readyz
+    port: 8081
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Startup probe (Kubernetes 1.18+)
+startupProbe:
+  httpGet:
+    path: /readyz
+    port: 8081
+  failureThreshold: 30
+  periodSeconds: 10
+
+# Priority class name
+priorityClassName: ""
+
+# Termination grace period
+terminationGracePeriodSeconds: 30
+
+# DNS policy
+dnsPolicy: ClusterFirst
+
+# Host networking
+hostNetwork: false
+
+# Host PID
+hostPID: false
+
+# Service type
+service:
+  type: ClusterIP
+  port: 443
+  targetPort: 9443
+  annotations: {}
+
+# Service Account Auto Mount
+automountServiceAccountToken: true
+
+# Webhook configuration
+webhook:
+  enabled: true
+  port: 9443
+  path: /mutate
+
+# RBAC Configuration
+rbac:
+  create: true
+  # Enable if you already have a ClusterRole with the same name
+  # use: false

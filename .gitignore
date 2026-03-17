@@ -1,0 +1,69 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local environment
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Temporary files
+/tmp/
+/temp/
+*.tmp
+
+# AWS temporary files
+trust-policy.json
+.aws-credentials
+.aws-config
+
+# Kubernetes local files
+kubeconfig
+kubeconfig.local
+
+# Helm temporary files
+*.tgz
+Chart.lock
+
+# Log files
+*.log
+logs/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node modules (if applicable)
+node_modules/
+package-lock.json
+
+# Python virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# ArgoCD
+argocd/resources/
+.argocd-credentials
+
+# Sensitive data
+secrets/
+*.secret
+private/

@@ -1,0 +1,35 @@
+---
+# ECS Cluster Example
+apiVersion: ecs.services.k8s.aws/v1alpha1
+kind: Cluster
+metadata:
+  name: example-cluster
+  namespace: default
+spec:
+  clusterName: example-cluster
+  clusterSettings:
+  - name: containerInsights
+    value: enabled
+  tags:
+  - key: Environment
+    value: example
+  - key: ManagedBy
+    value: kubernetes
+
+---
+# ECS Cluster Capacity Providers
+apiVersion: ecs.services.k8s.aws/v1alpha1
+kind: ClusterCapacityProviders
+metadata:
+  name: example-cluster-capacity-providers
+  namespace: default
+spec:
+  clusterRef:
+    name: example-cluster
+  capacityProviders:
+  - FARGATE
+  - FARGATE_SPOT
+  defaultCapacityProviderStrategy:
+  - capacityProvider: FARGATE
+    weight: 1
+    base: 1

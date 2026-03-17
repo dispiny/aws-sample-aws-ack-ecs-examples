@@ -1,0 +1,47 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ack-system
+
+namePrefix: aws-ack-ecs-
+
+commonLabels:
+  app.kubernetes.io/name: aws-ack-ecs-controller
+  app.kubernetes.io/part-of: aws-controllers-k8s
+  managed-by: argocd
+
+commonAnnotations:
+  argocd.argoproj.io/sync-wave: "0"
+
+resources:
+- namespace.yaml
+
+replicas:
+- name: aws-ack-ecs-controller
+  count: 1
+
+vars:
+- name: AWS_REGION
+  objref:
+    kind: ConfigMap
+    name: ack-system-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.region
+  
+- name: ACCOUNT_ID
+  objref:
+    kind: ConfigMap
+    name: ack-system-config
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.accountId
+
+patchesStrategicMerge: []
+
+patchesJson6902: []
+
+# Image override (optional)
+images:
+- name: aws-ack-ecs-controller
+  newTag: v1.3.0
